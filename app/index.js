@@ -20,8 +20,11 @@ function AppGenerator(args, options, config) {
   // resolved to mocha by default (could be switched to jasmine for instance)
   this.hookFor('test-framework', { as: 'app' });
 
+  this.sourceRoot(path.join(__dirname, 'templates'));
+  this.appname = path.basename(process.cwd());
   this.indexFile = this.readFileAsString(path.join(this.sourceRoot(), 'index.html'));
   this.mainJsFile = '';
+  this.yeoman = yeoman;
 
   this.on('end', function () {
     console.log('\nI\'m all done. Just run ' + 'npm install && bower install'.bold.yellow + ' to install the required dependencies.');
@@ -76,7 +79,7 @@ AppGenerator.prototype.askFor = function askFor() {
 };
 
 AppGenerator.prototype.gruntfile = function gruntfile() {
-  this.template('Gruntfile.js');
+  this.copy('Gruntfile.js', 'Gruntfile.js');
 };
 
 AppGenerator.prototype.packageJSON = function packageJSON() {
