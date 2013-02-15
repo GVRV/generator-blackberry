@@ -46,7 +46,7 @@ AppGenerator.prototype.askFor = function askFor() {
   '\n ´   '+'`  |'.red+'° '+'´ Y'.red+' `\n';
 
   console.log(welcome);
-  console.log('Out of the box I include HTML5 Boilerplate, jQuery and Modernizr.');
+  console.log('Out of the box I include HTML5 Boilerplate and jQuery');
 
   var prompts = [{
     name: 'compassBootstrap',
@@ -99,13 +99,6 @@ AppGenerator.prototype.jshint = function jshint() {
 
 AppGenerator.prototype.editorConfig = function editorConfig() {
   this.copy('editorconfig', '.editorconfig');
-};
-
-AppGenerator.prototype.h5bp = function h5bp() {
-  this.copy('favicon.ico', 'app/favicon.ico');
-  this.copy('404.html', 'app/404.html');
-  this.copy('robots.txt', 'app/robots.txt');
-  this.copy('htaccess', 'app/.htaccess');
 };
 
 AppGenerator.prototype.bootstrapJs = function bootstrapJs() {
