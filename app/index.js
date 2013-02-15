@@ -217,4 +217,5 @@ AppGenerator.prototype.app = function app() {
   this.mkdir('app/images');
   this.write('app/index.html', this.indexFile);
   this.write('app/scripts/main.js', this.mainJsFile);
+  this.copy('config.xml', 'app/config.xml');
 };
