@@ -9,6 +9,74 @@ module.exports = AppGenerator;
 function AppGenerator(args, options, config) {
   yeoman.generators.Base.apply(this, arguments);
 
+  // Parse options for the config.xml file 
+  this.option('app-version', {
+    'desc': 'The version of the app',
+    'type': String,
+    'banner': 'The version of the app as included in config.xml'
+  });
+  this.options['app-version'] = this.options['app-version'] || '1.0.0';
+
+  // App id will just be app_name.firstWord().toLowerCase()
+  this.option('app-name', {
+    'desc': 'The name of the app',
+    'type': String,
+    'banner': 'The name of the app as included in config.xml'
+  });
+  this.options['app-name'] = this.options['app-name'] || 'sampleApp';
+  this.app_id = this.options['app-name'].split(' ')[0].toLowerCase();
+
+  this.option('app-lang', {
+    'desc': 'The Language of the app',
+    'type': String,
+    'banner': 'The language of the app as included in config.xml'
+  });
+  this.options['app-lang'] = this.options['app-lang'] || 'en';
+
+  this.option('author-href', {
+    'desc': 'The link to the author\'s website',
+    'type': String,
+    'banner': 'The website of the author of the app as included in config.xml'
+  });
+  this.options['author-href'] = this.options['author-href'] || 'http://www.example.com/';
+
+  this.option('author-name', {
+    'desc': 'The name of the author',
+    'type': String,
+    'banner': 'The name of the author of the app as included in config.xml'
+  });
+  this.options['author-name'] = this.options['author-name'] || 'John Smith';
+
+  this.option('author-copyright', {
+    'desc': 'The copyright information of the author',
+    'type': String,
+    'banner': 'The copyright information of the author as included in config.xml'
+  });
+  this.options['author-copyright'] = this.options['author-copyright'] || ('copyright ' + new Date().getFullYear());
+
+  this.option('app-index', {
+    'desc': 'The index page for the app',
+    'type': String,
+    'banner': 'The index page for the app as included in config.xml'
+  });
+  this.options['app-index'] = this.options['app-index'] || 'index.html';
+
+  this.option('app-icon', {
+    'desc': 'The icon of the app (include "imgs/" directory)',
+    'type': String,
+    'banner': 'The path to the icon for the app as included in config.xml'
+  });
+  this.options['app-icon'] = this.options['app-icon'] || 'imgs/icon.png';
+
+  this.option('app-description', {
+    'desc': 'The description of the app',
+    'type': String,
+    'banner': 'The description for the app as included in config.xml'
+  });
+  this.options['app-description'] = this.options['app-description'] || 'Sample application';
+
+  this.option('access-uri');
+
   // setup the test-framework property, Gruntfile template will need this
   this.test_framework = options['test-framework'] || 'mocha';
 
@@ -215,5 +283,5 @@ AppGenerator.prototype.app = function app() {
   this.mkdir('app/images');
   this.write('app/index.html', this.indexFile);
   this.write('app/scripts/main.js', this.mainJsFile);
-  this.copy('config.xml', 'app/config.xml');
+  this.template('config.xml', 'app/config.xml');
 };
