@@ -184,7 +184,7 @@ AppGenerator.prototype.mainStylesheet = function mainStylesheet() {
 
 AppGenerator.prototype.writeIndex = function writeIndex() {
   // prepare default content text
-  var defaults = ['HTML5 Boilerplate', 'Twitter Bootstrap'];
+  var defaults = ['BB10 WebWorks API', 'HTML5 Boilerplate', 'Twitter Bootstrap'];
   var contentText = [
     '        <div class="container">',
     '            <div class="hero-unit">',
