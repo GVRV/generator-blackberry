@@ -1,0 +1,8 @@
+Description:
+    The 'yeoman init blackberry' command creates a new BB10 WebWorks Application.
+
+Example:
+    yeoman init blackberry
+
+    This generates a skeleton for a BB10 WebWorks Application.
+    See the README in the newly created application to get going.
