@@ -1,3 +1,15 @@
+var util = require('util'),
+    exec = require('child_process').exec;
+
+child = exec('cat *.js bad_file | wc -l', // command line argument directly in string
+  function (error, stdout, stderr) {      // one easy function to capture data/errors
+    console.log('stdout: ' + stdout);
+    console.log('stderr: ' + stderr);
+    if (error !== null) {
+      console.log('exec error: ' + error);
+    }
+});
+
 module.exports = function( grunt ) {
   'use strict';
   //
@@ -185,5 +197,32 @@ module.exports = function( grunt ) {
 
   // Alias the `test` task to run the `mocha` task instead
   grunt.registerTask('test', 'server:phantom <%= test_framework %>');
+
+  // Task to generate a Blackberry Archive from your built app
+  grunt.registerTask('compile-build', 'Compile your app into a .bar file', function (outputDir) {
+
+      var cb = this.async();
+      var result = false; 
+
+      outputDir = outputDir || "bb-dist";
+
+      exec('cd dist && zip -r ../appbuild.zip * && cd .. && bbwp appbuild.zip -o ' + outputDir, function (error, stdout, stderr) {
+        if (error !== null) {
+          console.log(stderr);
+        } else {
+          console.log(stdout);
+          result = true;
+        }
+
+        cb();
+      });
+
+      return result;
+  });
+
+  grunt.registerTask('compile', 'build and compile your app into a .bar file', [
+    'build',
+    'compile-build'
+    ]);
 
 };
