@@ -79,6 +79,7 @@ function AppGenerator(args, options, config) {
   this.option('access-uri');
 
   this.feature_hook = feature_utils.featureHook;
+  this.sample_hook = feature_utils.sampleHTMLHook;
 
   // setup the test-framework property, Gruntfile template will need this
   this.test_framework = options['test-framework'] || 'mocha';
@@ -322,6 +323,7 @@ AppGenerator.prototype.requirejs = function requirejs() {
       '/*global define */',
       'define([' + bbui_require + '], function () {',
       '    \'use strict\';\n',
+      feature_utils.SampleHook,
       '    return \'\\\'Allo \\\'Allo!\';',
       '});'
     ].join('\n'));

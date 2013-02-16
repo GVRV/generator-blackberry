@@ -1,0 +1,10 @@
+Description:
+    Adds a new BB10 WebWorks API sample code to Application
+
+Example:
+    yeoman init blackberry:sample sample_name
+
+    Adds the feature to:
+        app/config.xml
+        app/index.html
+        app/scripts/app.js

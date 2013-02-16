@@ -48,7 +48,9 @@ var FeatureUtils = {
         });
         this.options['fversion'] = this.options['fversion'] || "1.0.0.0"
     },
-    featureHook: "<!-- features -->",
+    featureHook: "<!-- features inserted here -->",
+    sampleHook: "// samples inserted here",
+    sampleHTMLHook: "<!-- samples inserted here -->", // Keep in sync with app/templates/index.html
     rewrite: rewrite
 };
 
