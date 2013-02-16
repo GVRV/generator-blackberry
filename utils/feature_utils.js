@@ -49,7 +49,7 @@ var FeatureUtils = {
         this.options['fversion'] = this.options['fversion'] || "1.0.0.0"
     },
     featureHook: "<!-- features inserted here -->",
-    sampleHook: "// samples inserted here",
+    sampleHook: "// samples inserted here", // Keep in sync with app/templates/index.html
     sampleHTMLHook: "<!-- samples inserted here -->", // Keep in sync with app/templates/index.html
     rewrite: rewrite
 };

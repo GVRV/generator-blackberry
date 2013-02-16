@@ -12,86 +12,84 @@ function Generator(args, options, config) {
 
     this.sourceRoot(path.join(__dirname, 'templates'));
     this.appname = path.basename(process.cwd());
+};
+
+util.inherits(Generator, yeoman.generators.NamedBase);
+
+Generator.prototype.fetchSample = function fetchSample() {
 
     var cb = this.async();
     var self = this;
-    this.remote('GVRV', 'generator-blackberry-samples', function (err, remote) {
+
+    return this.remote('GVRV', 'generator-blackberry-samples', function (err, remote) {
         if (err) { return cb(err); }
 
         try {
-            this.featuresFile = this.readFileAsString(path.join(remote.cachePath, self.name + '/config.xml'));
-            this.indexFile = this.readFileAsString(path.join(remote.cachePath, self.name + '/index.html'));
-            this.jsFile = this.readFileAsString(path.join(remote.cachePath, self.name + '/app.js'));
-            cb();
+            self.featuresFile = self.readFileAsString(path.join(remote.cachePath, self.name + '/config.xml'));
+            self.indexFile = self.readFileAsString(path.join(remote.cachePath, self.name + '/index.html'));
+            self.jsFile = self.readFileAsString(path.join(remote.cachePath, self.name + '/app.js'));
+
+            // Add the config
+            var file = 'app/config.xml'; 
+            var body = grunt.file.read(file);
+
+            body = feature_utils.rewrite({
+                needle: feature_utils.featureHook,
+                haystack: body,
+                splicable: self.featuresFile.split("\n")
+            });
+
+            grunt.file.write(file, body);
+
+            // Add the index.html markup
+            file = 'app/index.html';
+            body = grunt.file.read(file);
+
+            body = feature_utils.rewrite({
+                needle: feature_utils.sampleHTMLHook,
+                haystack: body,
+                splicable: self.indexFile.split("\n")
+            });
+
+            grunt.file.write(file, body);
+
+            // Add the JavaScript code 
+            // Assume usage of RequireJS 
+            try {
+                file = 'app/scripts/main.js';
+                body = grunt.file.read(file);
+
+                body = feature_utils.rewrite({
+                    needle: feature_utils.sampleHook,
+                    haystack: body,
+                    splicable: self.jsFile.split("\n")
+                });
+
+                grunt.file.write(file, body);
+            } catch (x) {
+                // if they don't use RequireJS, append it to the 
+                // end of the html file. 
+                file = 'app/index.html';
+                body = grunt.file.read(file);
+
+                body = feature_utils.rewrite({
+                    needle: '</body>',
+                    haystack: body,
+                    splicable: self.jsFile.split("\n")
+                });
+
+                grunt.file.write(file, body);
+            }
+
         } catch (x) {
+            console.log(x);
+            console.log(self.name);
             throw {
                 name: 'SampleNotFoundException',
                 message: 'Cannot find sample: \'' + self.name + '\''
             };
         }
+
+        cb();
     });
-};
-
-util.inherits(Generator, yeoman.generators.NamedBase);
-
-Generator.prototype.modifyAppConfig = function modifyAppConfig() {
-    if (!this.featuresFile) { return false; }
-
-    var file = 'app/config.xml'; 
-    var body = grunt.file.read(file);
-
-    body = feature_utils.rewrite({
-        needle: feature_utils.featureHook,
-        haystack: body,
-        splicable: this.featuresFile.split("\n")
-    });
-
-    grunt.file.write(file, body);
-};
-
-Generator.prototype.modifyAppIndex = function modifyAppIndex() {
-    if (!this.indexFile) { return false; }
-
-    var file = 'app/index.html';
-    var body = grunt.file.read(file);
-
-    body = feature_utils.rewrite({
-        needle: feature_utils.sampleHTMLHook,
-        haystack: body,
-        splicable: this.indexFile.split("\n")
-    });
-
-    grunt.file.write(file, body);
-};
-
-Generator.prototype.modifyAppJS = function modifyAppJS() {
-    if (!this.jsFile) { return false; }
-
-    // Assume usage of RequireJS 
-    try {
-        var file = 'app/scripts/app.js';
-        var body = grunt.file.read(file);
-
-        body = feature_utils.rewrite({
-            needle: feature_utils.sampleHook,
-            haystack: body,
-            splicable: this.jsFile.split("\n")
-        });
-
-        grunt.file.write(file, body);
-    } catch (x) {
-        // if they don't use RequireJS, append it to the 
-        // end of the html file. 
-
-        var file = 'app/index.html';
-        var body = grunt.file.read(file);
-
-        body = feature_utils.rewrite({
-            needle: '</body>',
-            haystack: body,
-            splicable: this.jsFile.split("\n")
-        });
-
-        grunt.file.write(file, body);
-    }
 };

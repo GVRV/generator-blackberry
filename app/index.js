@@ -282,7 +282,9 @@ AppGenerator.prototype.writeIndex = function writeIndex() {
   if (this.includeRequireJS) {
     defaults.push('RequireJS');
   } else {
-    this.mainJsFile = 'console.log(\'\\\'Allo \\\'Allo!\');';
+    this.mainJsFile = 'var main = function () {\nconsole.log(\'\\\'Allo \\\'Allo!\');\nfeature_utils.sampleHook;\n}\n';
+    this.mainJSFile += 'var blackberry = blackberry || false;\n';
+    this.mainJSFile += 'if (!blackberry) {\nmain();\n} else {\ndocument.addEventListener("webworksready", main);\n}\n';
   }
 
   // iterate over defaults and create content string
@@ -323,32 +325,42 @@ AppGenerator.prototype.requirejs = function requirejs() {
       '/*global define */',
       'define([' + bbui_require + '], function () {',
       '    \'use strict\';\n',
-      feature_utils.SampleHook,
       '    return \'\\\'Allo \\\'Allo!\';',
       '});'
     ].join('\n'));
 
     this.mainJsFile = [
-      'require.config({',
-      '    paths: {',
-      '        jquery: \'../components/jquery/jquery\',',
-      '        bootstrap: \'vendor/bootstrap\'' + (bbui_location === '' ? '' : ','),
-      bbui_location,
-      '    },',
-      '    shim: {',
-      '        boostrap: {',
-      '            deps: [\'jquery\'],',
-      '            exports: \'jquery\'',
+      'var blackberry = blackberry || false;',
+      'var main = function () {',
+      '    require.config({',
+      '        paths: {',
+      '            jquery: \'../components/jquery/jquery\',',
+      '            bootstrap: \'vendor/bootstrap\'' + (bbui_location === '' ? '' : ','),
+      '            ' + bbui_location,
+      '        },',
+      '        shim: {',
+      '            boostrap: {',
+      '                deps: [\'jquery\'],',
+      '                exports: \'jquery\'',
+      '            }',
       '        }',
-      '    }',
-      '});',
+      '    });',
       '',
-      'require([\'app\', \'jquery\', \'bootstrap\'], function (app, $) {',
-      '    \'use strict\';',
-      '    // use app here',
-      '    console.log(app);',
-      '    console.log(\'Running jQuery %s\', $().version);',
-      '});'
+      '    require([\'app\', \'jquery\', \'bootstrap\'], function (app, jquery, bootstrap) {',
+      '        \'use strict\';',
+      '        // use app here',
+      '        ' + feature_utils.sampleHook,
+      '        console.log(app);',
+      '        console.log(\'Running jQuery %s\', $().version);',
+      '    });',
+      '};',
+      '',
+      '// detect if webworks is ready or not',
+      'if (blackberry) {',
+      '    main();',
+      '} else {',
+      '    document.addEventListener("webworksready", main);',
+      '}'
     ].join('\n');
   }
 };
