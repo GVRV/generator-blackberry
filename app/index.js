@@ -2,6 +2,7 @@
 var util = require('util');
 var path = require('path');
 var yeoman = require('../../../../');
+var feature_utils = require('../utils/feature_utils')
 
 
 module.exports = AppGenerator;
@@ -76,6 +77,8 @@ function AppGenerator(args, options, config) {
   this.options['app-description'] = this.options['app-description'] || 'Sample application';
 
   this.option('access-uri');
+
+  this.feature_hook = feature_utils.featureHook;
 
   // setup the test-framework property, Gruntfile template will need this
   this.test_framework = options['test-framework'] || 'mocha';

@@ -1,0 +1,8 @@
+Description:
+    Adds a new BB10 WebWorks API Feature to Application
+
+Example:
+    yeoman init blackberry:feature api_name [--required] [--fversion version_no]
+
+    Adds the feature to:
+        app/config.xml
