@@ -63,11 +63,11 @@ function AppGenerator(args, options, config) {
   this.options['app-index'] = this.options['app-index'] || 'index.html';
 
   this.option('app-icon', {
-    'desc': 'The icon of the app (include "imgs/" directory)',
+    'desc': 'The icon of the app (include "images/" directory)',
     'type': String,
     'banner': 'The path to the icon for the app as included in config.xml'
   });
-  this.options['app-icon'] = this.options['app-icon'] || 'imgs/icon.png';
+  this.options['app-icon'] = this.options['app-icon'] || 'images/icon.png';
 
   this.option('app-description', {
     'desc': 'The description of the app',
@@ -128,6 +128,16 @@ AppGenerator.prototype.askFor = function askFor() {
     message: 'Would you like to include RequireJS (for AMD support)?',
     default: 'Y/n',
     warning: 'Yes: RequireJS will be placed into the JavaScript vendor directory.'
+  },{
+    name: 'bootstrap',
+    message: 'Would you like to include the Twitter Bootstrap JS plugins?',
+    default: 'Y/n',
+    warning: 'Yes: All Twitter Bootstrap plugins will be placed into the JavaScript vendor directory.'
+  },{
+    name: 'usebbui',
+    message: 'Would you like to include BB-UI?',
+    default: 'Y/n',
+    warnings: 'Yes: BB-UI will be placed into the JavaScript vendor directory'
   }];
 
   this.prompt(prompts, function (err, props) {
@@ -139,9 +149,34 @@ AppGenerator.prototype.askFor = function askFor() {
     // we change a bit this way of doing to automatically do this in the self.prompt() method.
     this.compassBootstrap = (/y/i).test(props.compassBootstrap);
     this.includeRequireJS = (/y/i).test(props.includeRequireJS);
+    this.bootstrap = (/y/i).test(props.bootstrap);
+    this.usebbui = (/y/i).test(props.usebbui);
 
     cb();
   }.bind(this));
+};
+
+AppGenerator.prototype.useBBUI = function useBBUI() {
+  if (!this.usebbui) { return; }
+
+  // Copy over the bbUI css and js files to the vendor 
+  // directory. The functions responsible for writing to 
+  // index.html will take care of including them. The 
+  // RequireJS function will take of detecting whether 
+  // it should include the JS file. 
+  this.copy('bbui.js', 'app/scripts/vendor/bbui.js');
+
+  if (this.compassBootstrap) {
+    this.copy('bbui.css', 'app/styles/vendor/_bbui.scss');
+  } else {
+    this.copy('bbui.css', 'app/styles/vendor/bbui.css');
+  }
+}
+
+AppGenerator.prototype.copyGlyphicons = function copyGlyphicons() {
+  this.copy('glyphicons-halflings.png', 'app/images/glyphicons-halflings.png');
+  this.copy('glyphicons-halflings-white.png', 'app/images/glyphicons-halflings-white.png');
+  this.copy('icon.png', 'app/images/icon.png');
 };
 
 AppGenerator.prototype.gruntfile = function gruntfile() {
@@ -159,7 +194,7 @@ AppGenerator.prototype.git = function git() {
 
 AppGenerator.prototype.bower = function bower() {
   this.copy('bowerrc', '.bowerrc');
-  this.copy('_component.json', 'component.json');
+  this.template('_component.json', 'component.json');
 };
 
 AppGenerator.prototype.jshint = function jshint() {
@@ -170,18 +205,38 @@ AppGenerator.prototype.editorConfig = function editorConfig() {
   this.copy('editorconfig', '.editorconfig');
 };
 
-AppGenerator.prototype.bootstrapJs = function bootstrapJs() {
-  // TODO: create a Bower component for this
-  if (this.includeRequireJS) {
-    this.copy('bootstrap.js', 'app/scripts/vendor/bootstrap.js');
-  }
+AppGenerator.prototype.fetchBootstrap = function fetchBootstrap() {
+  // prevent the bootstrap fetch is user said NO
+  if(!this.bootstrap) { return; }
+  this.copy('bootstrap.js', 'app/scripts/vendor/bootstrap.js');
 };
 
 AppGenerator.prototype.mainStylesheet = function mainStylesheet() {
   if (this.compassBootstrap) {
-    this.write('app/styles/main.scss', ''); //@import \'compass_twitter_bootstrap\';\n\n.hero-unit {\n    margin: 50px auto 0 auto;\n    width: 250px;\n}');
+    var cb = this.async();
+
+    // Include BBUI if needed.
+    var bbui = "";
+    if (this.usebbui) {
+      bbui = "@import \'vendor/_bbui.scss\';\n";
+    }
+
+    this.write('app/styles/main.scss', bbui + '@import \'compass_twitter_bootstrap\';\n\n.hero-unit {\n    margin: 50px auto 0 auto;\n    width: 250px;\n}');
+    this.remote('kristianmandrup', 'compass-twitter-bootstrap', 'c3ccce2cca5ec52437925e8feaaa11fead51e132', function(err, remote) {
+      if(err) { return cb(err); }
+
+      remote.directory('stylesheets', 'app/styles');
+
+      cb();
+    });
   } else {
-    this.write('app/styles/main.css', 'body {\n    background: #fafafa;\n}\n\n.hero-unit {\n    margin: 50px auto 0 auto;\n    width: 250px;\n}');
+    // Include BBUI if needed 
+    var bbui = ""
+    if (this.usebbui) {
+      bbui = '@import url(\'vendor/bbui.css\');\n';
+    }
+
+    this.write('app/styles/main.css', bbui + 'body {\n    background: #fafafa;\n}\n\n.hero-unit {\n    margin: 50px auto 0 auto;\n    width: 250px;\n}');
   }
 };
 
@@ -196,7 +251,9 @@ AppGenerator.prototype.writeIndex = function writeIndex() {
     '                <ul>'
   ];
 
-  if (this.compassBootstrap && !this.includeRequireJS) {
+  this.indexFile = this.indexFile.replace(/js\/vendor\/jquery[^"]+/g, 'scripts/vendor/jquery.min.js');
+
+  if (this.bootstrap && !this.includeRequireJS) {
     // wire Twitter Bootstrap plugins
     this.indexFile = this.appendScripts(this.indexFile, 'scripts/plugins.js', [
       'components/sass-bootstrap/js/bootstrap-affix.js',
@@ -213,6 +270,12 @@ AppGenerator.prototype.writeIndex = function writeIndex() {
       'components/sass-bootstrap/js/bootstrap-collapse.js',
       'components/sass-bootstrap/js/bootstrap-tab.js'
     ]);
+  }
+
+  if (this.usebbui && !this.includeRequireJS) {
+    this.indexFile = this.appendScripts(this.indexFile, 'scripts/bbui.js', [
+      'scripts/vendor/bbui.js'
+      ]);
   }
 
   if (this.includeRequireJS) {
@@ -246,10 +309,18 @@ AppGenerator.prototype.requirejs = function requirejs() {
       'data-main': 'scripts/main'
     });
 
+    // include BBUI if necessary
+    var bbui_location = '';
+    var bbui_require = '';
+    if (this.usebbui) {
+      bbui_location = '        bbui: \'vendor/bbui\'';
+      bbui_require = '\'bbui\'';
+    }
+
     // add a basic amd module
     this.write('app/scripts/app.js', [
       '/*global define */',
-      'define([], function () {',
+      'define([' + bbui_require + '], function () {',
       '    \'use strict\';\n',
       '    return \'\\\'Allo \\\'Allo!\';',
       '});'
@@ -259,7 +330,8 @@ AppGenerator.prototype.requirejs = function requirejs() {
       'require.config({',
       '    paths: {',
       '        jquery: \'../components/jquery/jquery\',',
-      '        bootstrap: \'vendor/bootstrap\'',
+      '        bootstrap: \'vendor/bootstrap\'' + (bbui_location === '' ? '' : ','),
+      bbui_location,
       '    },',
       '    shim: {',
       '        boostrap: {',
