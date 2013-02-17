@@ -29,6 +29,12 @@ Generator.prototype.fetchSample = function fetchSample() {
             self.indexFile = self.readFileAsString(path.join(remote.cachePath, self.name + '/index.html'));
             self.jsFile = self.readFileAsString(path.join(remote.cachePath, self.name + '/app.js'));
 
+            // try to include the includes
+            try {
+                remote.directory('includes', 'app/includes');
+                remote.directory('images', 'app/images/includes');
+            } catch (x) {};
+
             // Add the config
             var file = 'app/config.xml'; 
             var body = grunt.file.read(file);
@@ -45,6 +51,7 @@ Generator.prototype.fetchSample = function fetchSample() {
             file = 'app/index.html';
             body = grunt.file.read(file);
 
+            body = body.replace(feature_utils.removeHTMLregex, '');
             body = feature_utils.rewrite({
                 needle: feature_utils.sampleHTMLHook,
                 haystack: body,
@@ -59,6 +66,7 @@ Generator.prototype.fetchSample = function fetchSample() {
                 file = 'app/scripts/main.js';
                 body = grunt.file.read(file);
 
+                body = body.replace(feature_utils.removeJSregex, '');
                 body = feature_utils.rewrite({
                     needle: feature_utils.sampleHook,
                     haystack: body,
@@ -72,6 +80,7 @@ Generator.prototype.fetchSample = function fetchSample() {
                 file = 'app/index.html';
                 body = grunt.file.read(file);
 
+                body = body.replace(feature_utils.removeJSregex, '');
                 body = feature_utils.rewrite({
                     needle: '</body>',
                     haystack: body,

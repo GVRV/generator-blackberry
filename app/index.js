@@ -245,6 +245,7 @@ AppGenerator.prototype.writeIndex = function writeIndex() {
   // prepare default content text
   var defaults = ['BB10 WebWorks API', 'HTML5 Boilerplate', 'Twitter Bootstrap'];
   var contentText = [
+    '        <!-- removeHtml -->',
     '        <div class="container">',
     '            <div class="hero-unit">',
     '                <h1>\'Allo, \'Allo!</h1>',
@@ -282,7 +283,7 @@ AppGenerator.prototype.writeIndex = function writeIndex() {
   if (this.includeRequireJS) {
     defaults.push('RequireJS');
   } else {
-    this.mainJsFile = 'var main = function () {\nconsole.log(\'\\\'Allo \\\'Allo!\');\nfeature_utils.sampleHook;\n}\n';
+    this.mainJsFile = 'var main = function () {\n// removeJS\nconsole.log(\'\\\'Allo \\\'Allo!\');\n// endRemoveJS\nfeature_utils.sampleHook;\n}\n';
     this.mainJSFile += 'var blackberry = blackberry || false;\n';
     this.mainJSFile += 'if (!blackberry) {\nmain();\n} else {\ndocument.addEventListener("webworksready", main);\n}\n';
   }
@@ -298,6 +299,7 @@ AppGenerator.prototype.writeIndex = function writeIndex() {
     '                <h3>Enjoy coding! - Yeoman</h3>',
     '            </div>',
     '        </div>',
+    '        <!-- endRemoveHtml -->',
     ''
   ]);
 
@@ -350,8 +352,10 @@ AppGenerator.prototype.requirejs = function requirejs() {
       '        \'use strict\';',
       '        // use app here',
       '        ' + feature_utils.sampleHook,
+      '        // removeJS',
       '        console.log(app);',
       '        console.log(\'Running jQuery %s\', $().version);',
+      '        // endRemoveJS',
       '    });',
       '};',
       '',

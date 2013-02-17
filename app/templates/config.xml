@@ -22,6 +22,9 @@
     <access uri="*" subdomains="true" />
     <% } %>
 
+    <feature id="blackberry.system.event" />
+    <feature id="blackberry.app" />
+    <feature id="blackberry.app.event" />
     <%= feature_hook %>
 
 </widget>

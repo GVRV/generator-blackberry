@@ -51,7 +51,9 @@ var FeatureUtils = {
     featureHook: "<!-- features inserted here -->",
     sampleHook: "// samples inserted here", // Keep in sync with app/templates/index.html
     sampleHTMLHook: "<!-- samples inserted here -->", // Keep in sync with app/templates/index.html
-    rewrite: rewrite
+    rewrite: rewrite,
+    removeHTMLregex: /<!-- removeHtml -->[\s\S]*?<!-- endRemoveHtml -->/igm,
+    removeJSregex: /\/\/ removeJS[\s\S]*?\/\/ endRemoveJS/igm
 };
 
 module.exports = FeatureUtils;
